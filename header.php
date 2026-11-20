@@ -1,0 +1,8 @@
+<?php require_once __DIR__.'/config.php'; $cartCount=0; if(user()){ $q=$pdo->prepare('SELECT COALESCE(SUM(quantity),0) FROM cart_items WHERE user_id=?'); $q->execute([user()['id']]); $cartCount=(int)$q->fetchColumn(); } $isAdminArea = strpos($_SERVER['SCRIPT_NAME'], '/admin/') !== false; $cssPath = $isAdminArea ? '../assets/style.css' : 'assets/style.css'; ?>
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PCtest — PC Components Store</title><link rel="stylesheet" href="<?=h($cssPath)?>"></head><body>
+<?php if($isAdminArea): ?>
+<header class="admin-top"><a class="brand" href="../index.php"><span>PC</span>test <small>ADMIN</small></a><div class="admin-top-right"><a href="../index.php" class="admin-view-store">↗ ดูหน้าร้าน</a><span class="admin-user">👤 <?=h(user()['name']??'Admin')?></span><a href="../logout.php" class="admin-logout">ออกจากระบบ</a></div></header>
+<?php else: ?>
+<header class="top"><a class="brand" href="index.php"><span>PC</span>test</a><nav><a href="index.php">หน้าร้าน</a><a href="index.php#products">สินค้า</a><?php if(user()): ?><a href="cart.php">ตะกร้า (<?= $cartCount ?>)</a><a href="orders.php">คำสั่งซื้อ</a><a href="profile.php">บัญชีของฉัน</a><?php if(user()['role']==='admin'): ?><a href="admin/index.php">Admin</a><?php endif; ?><a href="logout.php">ออกจากระบบ</a><?php else: ?><a href="login.php">เข้าสู่ระบบ</a><a class="nav-cta" href="register.php">สมัครสมาชิก</a><?php endif; ?></nav></header>
+<?php endif; ?>
+<?php $flash=get_flash(); if($flash): ?><div class="flash"><?=h($flash)?></div><?php endif; ?>

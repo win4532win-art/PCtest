@@ -1,0 +1,11 @@
+<?php require 'header.php';
+$q=trim($_GET['q']??''); $cat=(int)($_GET['cat']??0);
+$sql="SELECT p.*,c.name category FROM products p LEFT JOIN categories c ON c.id=p.category_id WHERE 1"; $params=[];
+if($q!==''){ $sql.=" AND (p.name LIKE ? OR p.description LIKE ?)"; $params[]="%$q%";$params[]="%$q%"; }
+if($cat){$sql.=" AND p.category_id=?";$params[]=$cat;}
+$sql.=" ORDER BY p.created_at DESC"; $stmt=$pdo->prepare($sql);$stmt->execute($params);$products=$stmt->fetchAll();$categories=$pdo->query('SELECT * FROM categories ORDER BY name')->fetchAll();
+?>
+<div class="container"><section class="hero"><div><span class="badge">PC COMPONENTS & GAMING STORE</span><h1>UPGRADE YOUR<br><span>PC EXPERIENCE.</span></h1><p>อุปกรณ์คอมพิวเตอร์ เกมมิ่ง และอะไหล่ PC ที่คุณกำลังมองหา ครบจบในที่เดียว</p><a class="btn" href="#products">เลือกซื้อสินค้า →</a></div><div class="hero-art">🖥️</div></section>
+<div class="section-head" id="products"><h2>สินค้าแนะนำ <span style="color:var(--orange)">/ PRODUCTS</span></h2><form class="search"><input name="q" placeholder="ค้นหาสินค้า..." value="<?=h($q)?>"><button class="btn">ค้นหา</button></form></div>
+<div class="inline" style="margin-bottom:18px"><a class="badge" href="index.php">ทั้งหมด</a><?php foreach($categories as $c):?><a class="badge" href="?cat=<?=$c['id']?>"><?=h($c['name'])?></a><?php endforeach;?></div>
+<div class="grid"><?php foreach($products as $p):?><article class="product"><a href="product.php?id=<?=$p['id']?>"><?php if($p['image']):?><img src="<?=h($p['image'])?>" alt="<?=h($p['name'])?>"><?php else:?><div class="placeholder">🖥</div><?php endif;?></a><div class="product-body"><h3><?=h($p['name'])?></h3><div class="muted"><?=h($p['category']??'สินค้า PC')?> · คงเหลือ <?=$p['stock']?></div><div class="price">฿<?=money($p['price'])?></div><div class="product-actions"><a class="btn" href="product.php?id=<?=$p['id']?>">ดูรายละเอียด</a><?php if(user()):?><form action="cart.php" method="post"><input type="hidden" name="product_id" value="<?=$p['id']?>"><input type="hidden" name="add" value="1"><button class="btn secondary">+ ตะกร้า</button></form><?php else:?><a class="btn secondary" href="login.php">ซื้อสินค้า</a><?php endif;?></div></div></article><?php endforeach;?></div><?php if(!$products):?><div class="empty">ยังไม่มีสินค้าในหมวดนี้</div><?php endif;?></div><?php require 'footer.php';?>
